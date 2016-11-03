@@ -21,10 +21,10 @@ public class CSyncCandleSpawner : MonoBehaviour {
     {
         if (m_nowSpawnCandle == null) return;
 
-        if (m_nowSpawnCandle.GetComponent<CCandle>().IsStock == true)
-        {
-            m_nowSpawnCandle = null;
-        }
+        //if (m_nowSpawnCandle.GetComponent<CCandle>().IsStock == true)
+        //{
+        //    m_nowSpawnCandle = null;
+        //}
 
     }
 

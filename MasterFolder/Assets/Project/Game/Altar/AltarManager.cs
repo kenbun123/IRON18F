@@ -36,7 +36,7 @@ public class AltarManager : NetworkBehaviour {
         {
             //追加
             //ゲーム終了処理
-            GameObject.Find("EndMgr").GetComponent<CGameEnd>().isHumanWin = true;
+            //GameObject.Find("EndMgr").GetComponent<CGameEnd>().isHumanWin = true;
         }
 
 	}
