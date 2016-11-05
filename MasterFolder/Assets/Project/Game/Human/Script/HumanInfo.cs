@@ -31,4 +31,5 @@ public class HumanInfo : MonoBehaviour {
 
     [SerializeField][Header("最大スタミナ")]
     protected float MaxStamina;
+
 }

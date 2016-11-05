@@ -4,15 +4,21 @@ using System.Collections;
 public class HumanMain : HumanInfo
 {
 
-
-    public Animation HumanAnimatiom;
-
     private FiniteStateMachine<HumanMain, HumanMain.HumanFiniteStatus> humanStateMachine;
-    public float MoveSpeed
+    private Animator humanAnimation;
+
+
+    public HumanFiniteStatus HumanStatusMessage;
+    [HideInInspector]
+    public Vector3 MoveDirection;
+
+
+
+    public float NormalSpeed
     {
         get { return normalSpeed; }
     }
-    public float DashSpped
+    public float DashSpeed
     {
         get { return dashSpeed; }
     }
@@ -20,22 +26,34 @@ public class HumanMain : HumanInfo
     {
         get { return hp; }
     }
-
+    public Animator HumanAnimation {
+        get{ return humanAnimation; }
+    }
+    
     
     void Awake()
     {
-        humanStateMachine.ChangeState(new HumanState.HumanStatusWaiting());
+
     }
     // Use this for initialization
     void Start()
     {
-        //gameObject.transform.position = new Vector3();
+
+        HumanStatusMessage = HumanFiniteStatus.WAITING;
+
+        //コンポーネントの取得
+        humanAnimation = CheckComponentNull<Animator>.CheckConmponentNull(this, "Class HumanMain : Don't Get Animator Component");
+        //ステート定義
+        humanStateMachine = new FiniteStateMachine<HumanMain, HumanFiniteStatus>(this);
+        humanStateMachine.ChangeState(humanStateMachine.RegisterState(new HumanState.HumanStatusWaiting()));
+        humanStateMachine.RegisterState(new HumanState.HumanStatusWalk());
+        humanStateMachine.RegisterState(new HumanState.HumanStatusDash());
     }
 
     // Update is called once per frame
     void Update()
     {
-
+        humanStateMachine.Update();
     }
 
     public void Damage(int atk)
@@ -43,4 +61,5 @@ public class HumanMain : HumanInfo
         hp -= atk;
         if (hp < 0) hp = 0;  //マイナス回避
     }
+
 }

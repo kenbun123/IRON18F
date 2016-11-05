@@ -126,3 +126,24 @@ public static class CExtentionsForDebug
 
 }
 
+//GetComponentのNULLチェック
+public static class CheckComponentNull<T>
+{
+    public static T CheckConmponentNull(MonoBehaviour mono,string log)
+    {
+        T compo;
+        if (mono.GetComponent<T>() == null)
+        {
+            Debug.Log(log);
+            return default(T);
+        }
+        else {
+
+            compo = mono.GetComponent<T>();
+            return compo;
+
+        }
+        //return default(T);
+    }
+}
+
