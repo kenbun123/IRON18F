@@ -27,9 +27,14 @@ public class HumanInfo : MonoBehaviour {
     protected int hp;
 
     [SerializeField][Header("最大キャンディ所持数")]
-    protected float MaxCandyNum;
+    protected float maxCandyNum;
+
+    [SerializeField][Header("最大ロウソク所持数")]
+    protected int maxCandleStock;
 
     [SerializeField][Header("最大スタミナ")]
-    protected float MaxStamina;
+    protected float maxStamina;
+
+
 
 }

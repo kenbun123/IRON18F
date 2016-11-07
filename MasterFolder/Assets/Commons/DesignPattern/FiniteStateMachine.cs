@@ -19,6 +19,7 @@ public class FiniteStateMachine<T, U>
     {
         CurrentState = null;
         PreviousState = null;
+
     }
 
     public FiniteStateMachine(T owner)

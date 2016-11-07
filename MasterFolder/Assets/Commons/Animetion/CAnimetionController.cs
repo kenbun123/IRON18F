@@ -1,20 +1,12 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class CAnimetionController : MonoBehaviour {
-
-	// Use this for initialization
-	void Start () {
-	
-	}
-	
-	// Update is called once per frame
-	void Update () {
-	
-	}
+public static class CAnimetionController  {
 
 
-    public bool IsMotionEnd(Animator anim, string name)
+
+
+    public  static bool IsMotionEnd(Animator anim, string name)
     {
         bool isname = anim.GetCurrentAnimatorStateInfo(0).IsName(name);
 

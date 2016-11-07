@@ -24,6 +24,12 @@ public class HumanControl : MonoBehaviour {
         }
 
         Move();
+
+        //ロウソクを置く
+        if (Input.GetKeyDown(KeyCode.X))
+        {
+            humanMain.HumanStatusMessage = HumanInfo.HumanFiniteStatus.PUT_CANDLE;
+        }
         
 	}
 

@@ -4,7 +4,9 @@ using System.Collections.Generic;
 
 public class HumanState : MonoBehaviour {
 
-
+    /// <summary>
+    /// 待機
+    /// </summary>
     public class HumanStatusWaiting : FSMState<HumanMain, HumanMain.HumanFiniteStatus>
     {
         public override HumanMain.HumanFiniteStatus StateID { get {
@@ -16,13 +18,14 @@ public class HumanState : MonoBehaviour {
             {
                 return new List<HumanMain.HumanFiniteStatus> {
                    HumanInfo.HumanFiniteStatus.WALK,
-                   HumanInfo.HumanFiniteStatus.DASH
+                   HumanInfo.HumanFiniteStatus.DASH,
+                   HumanInfo.HumanFiniteStatus.PUT_CANDLE
                 };
             }
         }
         public override bool CanEnter(FSMState<HumanMain, HumanMain.HumanFiniteStatus> currentState)
         {
-            if (entity.HumanStatusMessage == StateID)
+            if (entity.HumanStatusMessage == StateID && entity.CanChangeStatus == true)
             {
                 return true;
             }
@@ -53,6 +56,9 @@ public class HumanState : MonoBehaviour {
         }
     }
 
+    /// <summary>
+    /// 歩く
+    /// </summary>
     public class HumanStatusWalk : FSMState<HumanMain, HumanMain.HumanFiniteStatus>
     {
         public override HumanMain.HumanFiniteStatus StateID { get { return HumanMain.HumanFiniteStatus.WALK; } }
@@ -60,13 +66,15 @@ public class HumanState : MonoBehaviour {
         public override List<HumanMain.HumanFiniteStatus> NextStateIDs {
             get { return new List<HumanMain.HumanFiniteStatus> {
             HumanInfo.HumanFiniteStatus.WAITING,
-            HumanInfo.HumanFiniteStatus.DASH};
+            HumanInfo.HumanFiniteStatus.DASH,
+            HumanInfo.HumanFiniteStatus.PICK_UP_CANDLE,
+            HumanInfo.HumanFiniteStatus.PUT_CANDLE};
             }
         }
 
         public override bool CanEnter(FSMState<HumanMain, HumanMain.HumanFiniteStatus> currentState)
         {
-            if (entity.HumanStatusMessage == StateID)
+            if (entity.HumanStatusMessage == StateID && entity.CanChangeStatus== true)
             {
                 return true;
             }
@@ -101,6 +109,9 @@ public class HumanState : MonoBehaviour {
 
     }
 
+    /// <summary>
+    /// 走る
+    /// </summary>
     public class HumanStatusDash : FSMState<HumanMain, HumanMain.HumanFiniteStatus>
     {
         public override HumanMain.HumanFiniteStatus StateID { get { return HumanMain.HumanFiniteStatus.DASH; } }
@@ -111,13 +122,15 @@ public class HumanState : MonoBehaviour {
             {
                 return new List<HumanMain.HumanFiniteStatus> {
             HumanInfo.HumanFiniteStatus.WAITING,
-                HumanInfo.HumanFiniteStatus.WALK};
+                HumanInfo.HumanFiniteStatus.WALK,
+                HumanInfo.HumanFiniteStatus.PICK_UP_CANDLE,
+                HumanInfo.HumanFiniteStatus.PUT_CANDLE};
             }
         }
 
         public override bool CanEnter(FSMState<HumanMain, HumanMain.HumanFiniteStatus> currentState)
         {
-            if (entity.HumanStatusMessage == StateID)
+            if (entity.HumanStatusMessage == StateID && entity.CanChangeStatus == true)
             {
                 return true;
             }
@@ -148,6 +161,190 @@ public class HumanState : MonoBehaviour {
         public override void Exit()
         {
 
+        }
+
+    }
+
+    /// <summary>
+    /// ロウソクを拾う
+    /// </summary>
+    public class HumanStatusPickUpCandle : FSMState<HumanMain, HumanMain.HumanFiniteStatus>
+    {
+        public override HumanMain.HumanFiniteStatus StateID { get { return HumanMain.HumanFiniteStatus.PICK_UP_CANDLE; } }
+
+        public override List<HumanMain.HumanFiniteStatus> NextStateIDs
+        {
+            get
+            {
+                return new List<HumanMain.HumanFiniteStatus>
+                {
+                    HumanInfo.HumanFiniteStatus.WAITING,
+                    HumanInfo.HumanFiniteStatus.DASH,
+                    HumanInfo.HumanFiniteStatus.WALK
+                };
+            }
+        }
+
+        public override bool CanEnter(FSMState<HumanMain, HumanMain.HumanFiniteStatus> currentState)
+        {
+            if (entity.HumanStatusMessage == StateID )
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+
+        }
+        public override void Enter()
+        {
+            entity.HumanAnimation.SetInteger("Act", 2);
+            entity.CanChangeStatus = false;
+            
+        }
+        public override void Execute()
+        {
+            if (CAnimetionController.IsMotionEnd(entity.HumanAnimation, "Item"))
+            {
+
+                entity.CanChangeStatus = true;                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     
+            }
+        }
+        public override void Exit()
+        {
+            entity.HumanAnimation.SetInteger("Act", 0);
+        }
+
+    }
+
+    /// <summary>
+    /// ロウソクを置く
+    /// </summary>
+    public class HumanStatusPutCandle : FSMState<HumanMain, HumanMain.HumanFiniteStatus>
+    {
+
+        private GameObject candlePrefab;
+        public override HumanMain.HumanFiniteStatus StateID { get { return HumanMain.HumanFiniteStatus.PUT_CANDLE; } }
+
+        public override List<HumanMain.HumanFiniteStatus> NextStateIDs
+        {
+            get
+            {
+                return new List<HumanMain.HumanFiniteStatus>
+                {
+                    HumanInfo.HumanFiniteStatus.WAITING,
+                    HumanInfo.HumanFiniteStatus.DASH,
+                    HumanInfo.HumanFiniteStatus.WALK
+                };
+            }
+        }
+
+        public override bool CanEnter(FSMState<HumanMain, HumanMain.HumanFiniteStatus> currentState)
+        {
+            if (entity.HumanStatusMessage == StateID &&
+                entity.CandleStock > 0 )
+            {
+                return true;
+            }
+            else
+            {
+               
+                return false;
+            }
+
+        }
+        public override void Enter()
+        {
+       
+            candlePrefab = (GameObject)Resources.Load("Prefab/Candle");
+            //ロウソクを生成
+            var candle = Instantiate(candlePrefab);
+            candle.GetComponent<CandleMain>().SetStatus(CandleMain.CandleStatus.FIRE);
+            candle.transform.SetX(entity.transform.position.x);
+            candle.transform.SetZ(entity.transform.position.z);
+
+            //アニメーション
+            entity.HumanAnimation.SetInteger("Act", 2);
+            entity.CanChangeStatus = false;
+            entity.CandleStock -= 1;
+
+
+        }
+        public override void Execute()
+        {
+            if (CAnimetionController.IsMotionEnd(entity.HumanAnimation, "Item"))
+            {
+                entity.CanChangeStatus = true;
+            }
+        }
+        public override void Exit()
+        {
+            entity.HumanAnimation.SetInteger("Act", 0);
+        }
+
+    }
+
+    public class HumanStatusPickUpCandy : FSMState<HumanMain, HumanMain.HumanFiniteStatus>
+    {
+
+        private GameObject candlePrefab;
+        public override HumanMain.HumanFiniteStatus StateID { get { return HumanMain.HumanFiniteStatus.PICK_UP_CANDY; } }
+
+        public override List<HumanMain.HumanFiniteStatus> NextStateIDs
+        {
+            get
+            {
+                return new List<HumanMain.HumanFiniteStatus>
+                {
+                    HumanInfo.HumanFiniteStatus.WAITING,
+                    HumanInfo.HumanFiniteStatus.DASH,
+                    HumanInfo.HumanFiniteStatus.WALK
+                };
+            }
+        }
+
+        public override bool CanEnter(FSMState<HumanMain, HumanMain.HumanFiniteStatus> currentState)
+        {
+            if (entity.HumanStatusMessage == StateID &&
+                entity.CandleStock > 0)
+            {
+                return true;
+            }
+            else
+            {
+
+                return false;
+            }
+
+        }
+        public override void Enter()
+        {
+
+            candlePrefab = (GameObject)Resources.Load("Prefab/Candle");
+            //ロウソクを生成
+            var candle = Instantiate(candlePrefab);
+            candle.GetComponent<CandleMain>().SetStatus(CandleMain.CandleStatus.FIRE);
+            candle.transform.SetX(entity.transform.position.x);
+            candle.transform.SetZ(entity.transform.position.z);
+
+            //アニメーション
+            entity.HumanAnimation.SetInteger("Act", 2);
+            entity.CanChangeStatus = false;
+            entity.CandleStock -= 1;
+
+
+        }
+        public override void Execute()
+        {
+            if (CAnimetionController.IsMotionEnd(entity.HumanAnimation, "Use"))
+            {
+                entity.CanChangeStatus = true;
+            }
+        }
+        public override void Exit()
+        {
+            entity.HumanAnimation.SetInteger("Act", 0);
         }
 
     }

@@ -7,13 +7,15 @@ EditorBuildSettings:
   m_Scenes:
   - enabled: 0
     path: Assets/Project/StageEdit.unity
-  - enabled: 1
+  - enabled: 0
     path: Assets/Project/Title.unity
-  - enabled: 1
+  - enabled: 0
     path: Assets/Project/Matching.unity
-  - enabled: 1
+  - enabled: 0
     path: Assets/Project/Game.unity
-  - enabled: 1
+  - enabled: 0
     path: Assets/Project/Result.unity
   - enabled: 0
     path: Assets/Project/NetworkTest.unity
+  - enabled: 1
+    path: Assets/Project/CharcterTest.unity
