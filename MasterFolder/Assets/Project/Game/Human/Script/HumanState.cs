@@ -19,7 +19,9 @@ public class HumanState : MonoBehaviour {
                 return new List<HumanMain.HumanFiniteStatus> {
                    HumanInfo.HumanFiniteStatus.WALK,
                    HumanInfo.HumanFiniteStatus.DASH,
-                   HumanInfo.HumanFiniteStatus.PUT_CANDLE
+                   HumanInfo.HumanFiniteStatus.PUT_CANDLE,
+                   HumanInfo.HumanFiniteStatus.PICK_UP_CANDY,
+                   HumanInfo.HumanFiniteStatus.USE_CANDY
                 };
             }
         }
@@ -68,7 +70,9 @@ public class HumanState : MonoBehaviour {
             HumanInfo.HumanFiniteStatus.WAITING,
             HumanInfo.HumanFiniteStatus.DASH,
             HumanInfo.HumanFiniteStatus.PICK_UP_CANDLE,
-            HumanInfo.HumanFiniteStatus.PUT_CANDLE};
+            HumanInfo.HumanFiniteStatus.PUT_CANDLE,
+            HumanInfo.HumanFiniteStatus.PICK_UP_CANDY,
+            HumanInfo.HumanFiniteStatus.USE_CANDY};
             }
         }
 
@@ -121,23 +125,25 @@ public class HumanState : MonoBehaviour {
             get
             {
                 return new List<HumanMain.HumanFiniteStatus> {
-            HumanInfo.HumanFiniteStatus.WAITING,
+                HumanInfo.HumanFiniteStatus.WAITING,
                 HumanInfo.HumanFiniteStatus.WALK,
                 HumanInfo.HumanFiniteStatus.PICK_UP_CANDLE,
-                HumanInfo.HumanFiniteStatus.PUT_CANDLE};
+                HumanInfo.HumanFiniteStatus.PUT_CANDLE,
+                HumanInfo.HumanFiniteStatus.PICK_UP_CANDY,
+                HumanInfo.HumanFiniteStatus.USE_CANDY};
             }
         }
 
         public override bool CanEnter(FSMState<HumanMain, HumanMain.HumanFiniteStatus> currentState)
         {
-            if (entity.HumanStatusMessage == StateID && entity.CanChangeStatus == true)
-            {
-                return true;
-            }
-            else
-            {
-                return false;
-            }
+            if (entity.HumanStatusMessage != StateID) return false;
+
+            if (entity.CanChangeStatus != true) return false;
+
+            if (entity.Stamina <= 0) return false;
+
+            return true;
+
 
         }
         public override void Enter()
@@ -157,6 +163,14 @@ public class HumanState : MonoBehaviour {
                 entity.transform.rotation = Quaternion.Lerp(entity.transform.rotation, tmpRotation, Time.deltaTime * 10.0f);
             }
             entity.HumanAnimation.SetInteger("State", 2);
+
+            entity.Stamina -= Time.deltaTime;
+
+            if (entity.Stamina <= 0)
+            {
+                entity.Stamina = 0;
+
+            }
         }
         public override void Exit()
         {
@@ -201,7 +215,8 @@ public class HumanState : MonoBehaviour {
         {
             entity.HumanAnimation.SetInteger("Act", 2);
             entity.CanChangeStatus = false;
-            
+            entity.CandleStock += 1;
+
         }
         public override void Execute()
         {
@@ -285,6 +300,9 @@ public class HumanState : MonoBehaviour {
 
     }
 
+    /// <summary>
+    /// キャンディを拾う
+    /// </summary>
     public class HumanStatusPickUpCandy : FSMState<HumanMain, HumanMain.HumanFiniteStatus>
     {
 
@@ -306,8 +324,7 @@ public class HumanState : MonoBehaviour {
 
         public override bool CanEnter(FSMState<HumanMain, HumanMain.HumanFiniteStatus> currentState)
         {
-            if (entity.HumanStatusMessage == StateID &&
-                entity.CandleStock > 0)
+            if (entity.HumanStatusMessage == StateID)
             {
                 return true;
             }
@@ -321,17 +338,73 @@ public class HumanState : MonoBehaviour {
         public override void Enter()
         {
 
-            candlePrefab = (GameObject)Resources.Load("Prefab/Candle");
-            //ロウソクを生成
-            var candle = Instantiate(candlePrefab);
-            candle.GetComponent<CandleMain>().SetStatus(CandleMain.CandleStatus.FIRE);
-            candle.transform.SetX(entity.transform.position.x);
-            candle.transform.SetZ(entity.transform.position.z);
-
-            //アニメーション
             entity.HumanAnimation.SetInteger("Act", 2);
             entity.CanChangeStatus = false;
-            entity.CandleStock -= 1;
+            entity.CandyStock += 1;
+
+        }
+        public override void Execute()
+        {
+            if (CAnimetionController.IsMotionEnd(entity.HumanAnimation, "Item"))
+            {
+                entity.CanChangeStatus = true;
+            }
+        }
+        public override void Exit()
+        {
+            entity.HumanAnimation.SetInteger("Act", 0);
+        }
+
+    }
+
+    /// <summary>
+    /// ロウソクを置く
+    /// </summary>
+    public class HumanStatusUseCandy : FSMState<HumanMain, HumanMain.HumanFiniteStatus>
+    {
+
+        private GameObject candyPrefab;
+        public override HumanMain.HumanFiniteStatus StateID { get { return HumanMain.HumanFiniteStatus.USE_CANDY; } }
+
+        public override List<HumanMain.HumanFiniteStatus> NextStateIDs
+        {
+            get
+            {
+                return new List<HumanMain.HumanFiniteStatus>
+                {
+                    HumanInfo.HumanFiniteStatus.WAITING,
+                    HumanInfo.HumanFiniteStatus.DASH,
+                    HumanInfo.HumanFiniteStatus.WALK
+                };
+            }
+        }
+
+        public override bool CanEnter(FSMState<HumanMain, HumanMain.HumanFiniteStatus> currentState)
+        {
+            if (entity.HumanStatusMessage == StateID &&
+                entity.CandyStock > 0)
+            {
+                return true;
+            }
+            else
+            {
+
+                return false;
+            }
+
+        }
+        public override void Enter()
+        {
+            //キャンディを生成
+            candyPrefab = (GameObject)Resources.Load("Prefab/Candy");
+            var candy = Instantiate(candyPrefab);
+            candy.transform.position = entity.transform.position;
+            candy.GetComponent<CandyMain>().Direction = entity.transform.forward;
+
+            //アニメーション
+            entity.HumanAnimation.SetInteger("Act", 4);
+            entity.CanChangeStatus = false;
+            entity.CandyStock -= 1;
 
 
         }
@@ -348,6 +421,4 @@ public class HumanState : MonoBehaviour {
         }
 
     }
-
-
 }

@@ -73,4 +73,9 @@ public class FiniteStateMachine<T, U>
         stateRef.Remove(state.StateID);
 
     }
+
+    public FSMState<T, U> GetRegisterState(U id)
+    {
+        return stateRef[id];
+    }
 };

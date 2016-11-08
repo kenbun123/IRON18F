@@ -30,6 +30,10 @@ public class HumanControl : MonoBehaviour {
         {
             humanMain.HumanStatusMessage = HumanInfo.HumanFiniteStatus.PUT_CANDLE;
         }
+        if (Input.GetKeyDown(KeyCode.C))
+        {
+            humanMain.HumanStatusMessage = HumanInfo.HumanFiniteStatus.USE_CANDY;
+        }
         
 	}
 
@@ -46,7 +50,7 @@ public class HumanControl : MonoBehaviour {
 
         if (humanMain.MoveDirection.magnitude > 0.1f) { 
 
-            if (Input.GetKey(KeyCode.LeftShift))
+            if (Input.GetKey(KeyCode.LeftShift) && humanMain.Stamina >0)
             {
                 humanMain.HumanStatusMessage = HumanInfo.HumanFiniteStatus.DASH;
                 return;
@@ -56,12 +60,9 @@ public class HumanControl : MonoBehaviour {
             return;
         }
 
+        humanMain.HumanStatusMessage = HumanInfo.HumanFiniteStatus.WAITING;
 
 
     }
 
-    void Dash()
-    {
-
-    }
 }

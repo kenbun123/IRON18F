@@ -22,17 +22,63 @@ public class HumanCollision : MonoBehaviour {
 
     void OnTriggerEnter(Collider other)
     {
+
+        Candle(other);
+        Candy(other);
+    }
+
+
+    void OnTriggerStay(Collider other)
+    {
+        Fire(other);
+    }
+
+
+    void Candle(Collider other)
+    {
         if (other.gameObject.tag == TAG_CANDLE)
         {
             if (humanMain.CandleStock >= humanMain.MaxCandleStock) return;
             humanMain.HumanStatusMessage = HumanInfo.HumanFiniteStatus.PICK_UP_CANDLE;
-            humanMain.CandleStock += 1;
+
             Destroy(other.gameObject);
         }
+    }
 
+    void Candy(Collider other)
+    {
         if (other.gameObject.tag == TAG_CANDY)
         {
+            if (humanMain.CandyStock >= humanMain.MaxCandyStock) return;
+
+            humanMain.HumanStatusMessage = HumanInfo.HumanFiniteStatus.PICK_UP_CANDY;
+
+            Destroy(other.gameObject);
+        }
+    }
+
+    void Fire(Collider other)
+    {
+        if (other.gameObject.tag == TAG_FIRE)
+        {
+            ResusciTation();
+            StaminaRecovery();
+        }
+    }
+
+    void ResusciTation()
+    {
+        if (humanMain.Hp <= 0)
+        {
             
+        }
+    }
+
+    void StaminaRecovery()
+    {
+        if (humanMain.Hp <= 0)
+        {
+            humanMain.Stamina = humanMain.MaxStamina;
         }
     }
 }

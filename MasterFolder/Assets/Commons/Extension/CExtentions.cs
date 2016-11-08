@@ -135,6 +135,7 @@ public static class CheckComponentNull<T>
         if (mono.GetComponent<T>() == null)
         {
             Debug.Log(log);
+            mono.enabled = false;
             return default(T);
         }
         else {

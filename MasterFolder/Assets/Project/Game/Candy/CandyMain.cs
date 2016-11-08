@@ -20,6 +20,7 @@ public class CandyMain : MonoBehaviour {
     private float distance;       // 残りの移動距離
     private Vector3 vector;       // 発射方向
     private bool isShot;
+    private SphereCollider coll;
 
     public Vector3 Direction {
         set { vector = value; }
@@ -28,8 +29,12 @@ public class CandyMain : MonoBehaviour {
     // Use this for initialization
     void Start ()
     {
+        
         isShot = true;
         distance = maxDistance;
+
+        coll = GetComponent<SphereCollider>();
+        coll.enabled = false;
 	}
 	
 	// Update is called once per frame
@@ -38,6 +43,7 @@ public class CandyMain : MonoBehaviour {
         if (distance <= 0)
         {
             isShot = false;
+            coll.enabled = true;
         }
         if (isShot == false) return;
 
