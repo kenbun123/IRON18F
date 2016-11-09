@@ -21,20 +21,20 @@ public class HumanState : MonoBehaviour {
                    HumanInfo.HumanFiniteStatus.DASH,
                    HumanInfo.HumanFiniteStatus.PUT_CANDLE,
                    HumanInfo.HumanFiniteStatus.PICK_UP_CANDY,
-                   HumanInfo.HumanFiniteStatus.USE_CANDY
+                   HumanInfo.HumanFiniteStatus.USE_CANDY,
+                   HumanInfo.HumanFiniteStatus.DEATH,
+                   HumanInfo.HumanFiniteStatus.ACTION
+                  
                 };
             }
         }
         public override bool CanEnter(FSMState<HumanMain, HumanMain.HumanFiniteStatus> currentState)
         {
-            if (entity.HumanStatusMessage == StateID && entity.CanChangeStatus == true)
-            {
-                return true;
-            }
-            else
-            {
-                return false;
-            }
+            if (entity.HumanStatusMessage != StateID) return false;
+
+            if (entity.CanChangeStatus != true) return false;
+
+            return true;
             
         }
 
@@ -72,7 +72,9 @@ public class HumanState : MonoBehaviour {
             HumanInfo.HumanFiniteStatus.PICK_UP_CANDLE,
             HumanInfo.HumanFiniteStatus.PUT_CANDLE,
             HumanInfo.HumanFiniteStatus.PICK_UP_CANDY,
-            HumanInfo.HumanFiniteStatus.USE_CANDY};
+            HumanInfo.HumanFiniteStatus.USE_CANDY,
+            HumanInfo.HumanFiniteStatus.DEATH,
+            HumanInfo.HumanFiniteStatus.ACTION};
             }
         }
 
@@ -130,7 +132,9 @@ public class HumanState : MonoBehaviour {
                 HumanInfo.HumanFiniteStatus.PICK_UP_CANDLE,
                 HumanInfo.HumanFiniteStatus.PUT_CANDLE,
                 HumanInfo.HumanFiniteStatus.PICK_UP_CANDY,
-                HumanInfo.HumanFiniteStatus.USE_CANDY};
+                HumanInfo.HumanFiniteStatus.USE_CANDY,
+                HumanInfo.HumanFiniteStatus.DEATH,
+                HumanInfo.HumanFiniteStatus.ACTION};
             }
         }
 
@@ -194,7 +198,8 @@ public class HumanState : MonoBehaviour {
                 {
                     HumanInfo.HumanFiniteStatus.WAITING,
                     HumanInfo.HumanFiniteStatus.DASH,
-                    HumanInfo.HumanFiniteStatus.WALK
+                    HumanInfo.HumanFiniteStatus.WALK,
+                    HumanInfo.HumanFiniteStatus.DEATH
                 };
             }
         }
@@ -250,7 +255,8 @@ public class HumanState : MonoBehaviour {
                 {
                     HumanInfo.HumanFiniteStatus.WAITING,
                     HumanInfo.HumanFiniteStatus.DASH,
-                    HumanInfo.HumanFiniteStatus.WALK
+                    HumanInfo.HumanFiniteStatus.WALK,
+                    HumanInfo.HumanFiniteStatus.DEATH
                 };
             }
         }
@@ -317,7 +323,8 @@ public class HumanState : MonoBehaviour {
                 {
                     HumanInfo.HumanFiniteStatus.WAITING,
                     HumanInfo.HumanFiniteStatus.DASH,
-                    HumanInfo.HumanFiniteStatus.WALK
+                    HumanInfo.HumanFiniteStatus.WALK,
+                    HumanInfo.HumanFiniteStatus.DEATH
                 };
             }
         }
@@ -374,7 +381,8 @@ public class HumanState : MonoBehaviour {
                 {
                     HumanInfo.HumanFiniteStatus.WAITING,
                     HumanInfo.HumanFiniteStatus.DASH,
-                    HumanInfo.HumanFiniteStatus.WALK
+                    HumanInfo.HumanFiniteStatus.WALK,
+                    HumanInfo.HumanFiniteStatus.DEATH
                 };
             }
         }
@@ -418,6 +426,180 @@ public class HumanState : MonoBehaviour {
         public override void Exit()
         {
             entity.HumanAnimation.SetInteger("Act", 0);
+        }
+
+    }
+
+    /// <summary>
+    /// デス
+    /// </summary>
+    public class HumanStatusDeath : FSMState<HumanMain, HumanMain.HumanFiniteStatus>
+    {
+
+
+        public override HumanMain.HumanFiniteStatus StateID { get { return HumanMain.HumanFiniteStatus.DEATH; } }
+
+        public override List<HumanMain.HumanFiniteStatus> NextStateIDs
+        {
+            get
+            {
+                return new List<HumanMain.HumanFiniteStatus>
+                {
+                    HumanInfo.HumanFiniteStatus.WAITING
+                };
+            }
+        }
+
+        public override bool CanEnter(FSMState<HumanMain, HumanMain.HumanFiniteStatus> currentState)
+        {
+            if (entity.HumanStatusMessage == StateID &&
+                entity.Hp <= 0)
+            {
+                return true;
+            }
+            else
+            {
+
+                return false;
+            }
+
+        }
+        public override void Enter()
+        {
+
+
+
+        }
+        public override void Execute()
+        {
+
+            entity.HumanAnimation.SetInteger("State", 3);
+
+        }
+        public override void Exit()
+        {
+
+            entity.Hp = 1;
+
+        }
+
+    }
+
+    /// <summary>
+    /// アクション
+    /// </summary>
+    public class HumanStatusAction: FSMState<HumanMain, HumanMain.HumanFiniteStatus>
+    {
+        private ParticleSystem surprised;
+        private GameObject actionPrefab;
+
+
+        public override HumanMain.HumanFiniteStatus StateID { get { return HumanMain.HumanFiniteStatus.ACTION; } }
+
+        public override List<HumanMain.HumanFiniteStatus> NextStateIDs
+        {
+            get
+            {
+                return new List<HumanMain.HumanFiniteStatus>
+                {
+                    HumanInfo.HumanFiniteStatus.WAITING,
+                    HumanInfo.HumanFiniteStatus.DASH,
+                    HumanInfo.HumanFiniteStatus.WALK
+                };
+            }
+        }
+
+        public override bool CanEnter(FSMState<HumanMain, HumanMain.HumanFiniteStatus> currentState)
+        {
+            if (entity.HumanStatusMessage == StateID )
+            {
+                return true;
+            }
+            else
+            {
+
+                return false;
+            }
+
+        }
+        public override void Enter()
+        {
+            //最初にインスタンスするときのみ使用
+            if (actionPrefab == null)
+            {
+                actionPrefab = (GameObject)Resources.Load("Prefab/ExclamationMark");
+                var action = Instantiate(actionPrefab);
+                action.transform.parent = entity.transform;
+                action.transform.position = entity.transform.position;
+                action.transform.AddY(1.0f);
+
+                surprised = action.GetComponent<ParticleSystem>();
+            }
+            else {//二重再生を回避
+                surprised.Play();
+            }
+            
+            entity.HumanStateMachine.RevertToPreviousState();
+
+        }
+        public override void Execute()
+        {
+
+        }
+        public override void Exit()
+        {
+
+        }
+
+    }
+
+
+
+    public class HumanStatusRescue : FSMState<HumanMain, HumanMain.HumanFiniteStatus>
+    {
+
+
+        public override HumanMain.HumanFiniteStatus StateID { get { return HumanMain.HumanFiniteStatus.RESCUE; } }
+
+        public override List<HumanMain.HumanFiniteStatus> NextStateIDs
+        {
+            get
+            {
+                return new List<HumanMain.HumanFiniteStatus>
+                {
+                    HumanInfo.HumanFiniteStatus.WAITING
+                };
+            }
+        }
+
+        public override bool CanEnter(FSMState<HumanMain, HumanMain.HumanFiniteStatus> currentState)
+        {
+            if (entity.HumanStatusMessage == StateID )
+            {
+                return true;
+            }
+            else
+            {
+
+                return false;
+            }
+
+        }
+        public override void Enter()
+        {
+
+
+
+        }
+        public override void Execute()
+        {
+
+
+        }
+        public override void Exit()
+        {
+
+
         }
 
     }

@@ -7,18 +7,15 @@ public class HumanMain : HumanInfo
     private FiniteStateMachine<HumanMain, HumanMain.HumanFiniteStatus> humanStateMachine;
     private Animator humanAnimation;
     private int candleStock;
-    [SerializeField]
     private int candyStock;
     private float stamina;
 
-
     public HumanFiniteStatus HumanStatusMessage;
     public bool CanChangeStatus;
-    //[HideInInspector]
     public Vector3 MoveDirection;
+    public GameObject CarryHuman;
 
-
-
+    #region get,set
     public float NormalSpeed
     {
         get { return normalSpeed; }
@@ -37,6 +34,7 @@ public class HumanMain : HumanInfo
     public int Hp
     {
         get { return hp; }
+        set { hp = value; }
     }
     public int CandleStock {
         get { return candleStock; }
@@ -59,7 +57,9 @@ public class HumanMain : HumanInfo
     public FiniteStateMachine<HumanMain, HumanMain.HumanFiniteStatus> HumanStateMachine {
         get { return humanStateMachine; }
     }
-   
+    #endregion
+
+
     void Awake()
     {
         CanChangeStatus = true;
@@ -73,13 +73,27 @@ public class HumanMain : HumanInfo
         //コンポーネントの取得
         humanAnimation = CheckComponentNull<Animator>.CheckConmponentNull(this, "Class HumanMain : Don't Get Animator Component");
         InitState();
+
+
     }
 
     // Update is called once per frame
     void Update()
     {
+        if (Hp <= 0)
+        {
+            HumanStatusMessage = HumanFiniteStatus.DEATH;
+        }
+
+
+
+
         humanStateMachine.Update();
 
+        if (stamina <= 0)
+        {
+            
+        }
     }
     void FixedUpdate()
     {
@@ -94,6 +108,7 @@ public class HumanMain : HumanInfo
 
     void InitState()
     {
+
         //ステート定義
         humanStateMachine = new FiniteStateMachine<HumanMain, HumanFiniteStatus>(this);
         humanStateMachine.ChangeState(humanStateMachine.RegisterState(new HumanState.HumanStatusWaiting()));
@@ -103,6 +118,9 @@ public class HumanMain : HumanInfo
         humanStateMachine.RegisterState(new HumanState.HumanStatusPutCandle());
         humanStateMachine.RegisterState(new HumanState.HumanStatusPickUpCandy());
         humanStateMachine.RegisterState(new HumanState.HumanStatusUseCandy());
+        humanStateMachine.RegisterState(new HumanState.HumanStatusDeath());
+        humanStateMachine.RegisterState(new HumanState.HumanStatusAction());
+
     }
 
 }

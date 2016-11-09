@@ -9,8 +9,9 @@ public class HumanCollision : MonoBehaviour {
 
     private HumanMain humanMain;
 
-	// Use this for initialization
-	void Start () {
+    
+    // Use this for initialization
+    void Start () {
 
         humanMain = CheckComponentNull<HumanMain>.CheckConmponentNull(this,"Class HumanCollision : Don't Get HumanMain");
 
@@ -62,7 +63,8 @@ public class HumanCollision : MonoBehaviour {
         if (other.gameObject.tag == TAG_FIRE)
         {
             ResusciTation();
-            StaminaRecovery();
+
+            humanMain.Stamina = humanMain.MaxStamina;
         }
     }
 
@@ -74,11 +76,5 @@ public class HumanCollision : MonoBehaviour {
         }
     }
 
-    void StaminaRecovery()
-    {
-        if (humanMain.Hp <= 0)
-        {
-            humanMain.Stamina = humanMain.MaxStamina;
-        }
-    }
+
 }

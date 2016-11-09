@@ -12,6 +12,7 @@ public class HumanControl : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
+
         if (humanMain == null)
         {
             Debug.Log("Class HumanControl Don't Get humanMain");
@@ -33,6 +34,11 @@ public class HumanControl : MonoBehaviour {
         if (Input.GetKeyDown(KeyCode.C))
         {
             humanMain.HumanStatusMessage = HumanInfo.HumanFiniteStatus.USE_CANDY;
+        }
+
+        if (Input.GetKeyDown(KeyCode.Z))
+        {
+            humanMain.HumanStatusMessage = HumanInfo.HumanFiniteStatus.ACTION;
         }
         
 	}
@@ -64,5 +70,6 @@ public class HumanControl : MonoBehaviour {
 
 
     }
+
 
 }
