@@ -38,19 +38,24 @@ public class HumanState : MonoBehaviour {
             
         }
 
-
-        // public override List<HumanMain.HumanFiniteStatus> NextStateIDs { get { return new List<HumanMain.HumanFiniteStatus> { HumanMain.HumanFiniteStatus.DASH }; } }
-
         public override void Enter()
         {
-            entity.HumanAnimation.SetInteger("State", 0);
-            entity.HumanAnimation.SetInteger("Act",0);
+
         }
+
         public override void Execute()
         {
-
             entity.HumanAnimation.SetInteger("State", 0);
             entity.HumanAnimation.SetInteger("Act", 0);
+            if (entity.isFear)
+            {
+                entity.HumanAnimation.SetInteger("GState", 1);
+            }
+            else {
+
+                entity.HumanAnimation.SetInteger("GState", 0);
+            }
+
         }
         public override void Exit()
         {
@@ -98,7 +103,6 @@ public class HumanState : MonoBehaviour {
         {
 
             // 移動する向きとスピードを代入する
-            // 移動する向きとスピードを代入する
             entity.transform.position += new Vector3(entity.MoveDirection.x * entity.NormalSpeed, 0, entity.MoveDirection.z * entity.NormalSpeed );
 
             if (entity.MoveDirection.magnitude > 0.1f)
@@ -144,7 +148,11 @@ public class HumanState : MonoBehaviour {
 
             if (entity.CanChangeStatus != true) return false;
 
-            if (entity.Stamina <= 0) return false;
+            if (entity.Stamina <= 0)
+            {
+                
+                return false;
+            }
 
             return true;
 
@@ -156,8 +164,13 @@ public class HumanState : MonoBehaviour {
         }
         public override void Execute()
         {
+            if (entity.Stamina <= 0)
+            {
+                entity.Stamina = 0;
+                entity.HumanStatusMessage = HumanInfo.HumanFiniteStatus.WALK;
+                entity.HumanStateMachine.ChangeState(entity.HumanStateMachine.GetRegisterState(HumanInfo.HumanFiniteStatus.WALK));
 
-            // 移動する向きとスピードを代入する
+            }
             // 移動する向きとスピードを代入する
             entity.transform.position += new Vector3(entity.MoveDirection.x * entity.DashSpeed, 0, entity.MoveDirection.z * entity.DashSpeed);
 
@@ -170,11 +183,7 @@ public class HumanState : MonoBehaviour {
 
             entity.Stamina -= Time.deltaTime;
 
-            if (entity.Stamina <= 0)
-            {
-                entity.Stamina = 0;
 
-            }
         }
         public override void Exit()
         {

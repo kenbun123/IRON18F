@@ -1,92 +1,70 @@
-﻿//using UnityEngine;
-//using System.Collections;
+﻿using UnityEngine;
+using System.Collections;
 
-//public class GhostControl : MonoBehaviour {
+public class GhostControl : MonoBehaviour {
 
-//    private GhostMain m_ghostMain;
+    GhostMain ghostMain;
 
-//    // Use this for initialization
-//    void Start() {
+	// Use this for initialization
+	void Start () {
 
-//        m_ghostMain = gameObject.GetComponent<GhostMain>();
+        ghostMain = CheckComponentNull<GhostMain>.CheckConmponentNull(gameObject, "Class GhostControl : Don't Get GhostMain");
 
-//    }
+        if (ghostMain == null)
+        {
+            enabled = false;
+        }
 
-//    // Update is called once per frame
-//    void Update()
-//    {
-//        if (m_ghostMain == null)
-//        {
-//            //回避策↓
-//           // m_ghostMain = gameObject.GetComponent<GhostMain>();
-//            Debug.Log("GhostMainを取得できていない");
-//            return;
-//        }
+	}
+	
+	// Update is called once per frame
+	void Update () {
 
-//        if (m_ghostMain.m_pStateMachine.CurrentState().ID == (int)GhostStateID.STAN)
-//        {
-//            //m_ghostMain.m_pStateMachine.ChangeState(CGhostState_Stan.Instance());
-//            return;
-//        }
+        if (!Input.anyKey)
+        {
+            ghostMain.GhostStatusMessage = GhostInfo.GhostFiniteStatus.WAITING;
 
-//        Move();
+        }
 
-        
-//        CInputComponent.InputAction(CInputComponent.KEY_ACTION.TRIGGER, KeyCode.Joystick1Button1, PutDummy);
+        Move();
 
-//        //あとで消す
-//        CInputComponent.InputAction(CInputComponent.KEY_ACTION.TRIGGER, KeyCode.J, PutDummy);
+        if (Input.GetKeyDown(KeyCode.X))
+        {
+            //攻撃
+            ghostMain.GhostStatusMessage = GhostInfo.GhostFiniteStatus.ATTACK;
+        }
 
-//        if (m_ghostMain.m_pStateMachine.CurrentState().ID != (int)GhostStateID.ATK)
-//        {
-//            CInputComponent.InputAction(CInputComponent.KEY_ACTION.TRIGGER, KeyCode.Joystick1Button2, OnAttackFlg);
-//            //あとで消す
-//            CInputComponent.InputAction(CInputComponent.KEY_ACTION.TRIGGER, KeyCode.K, OnAttackFlg);
-//        }
-       
+        if (Input.GetKeyDown(KeyCode.C))
+        {
+            //ゴースト生成
+            ghostMain.GhostStatusMessage = GhostInfo.GhostFiniteStatus.DUMMY;
+        }
+	}
 
-//    }
+    void Move()
+    {
+        float x = Input.GetAxisRaw("Horizontal");
 
-//    void Move()
-//    {
-//        float x = Input.GetAxisRaw("Horizontal");
+        float z = Input.GetAxisRaw("Vertical");
 
-//        float z = Input.GetAxisRaw("Vertical");
+        // 移動する向きを求める
+        Vector3 tmpDirection = new Vector3(x, 0, z);
 
-//        // 移動する向きを求める
-//        Vector3 tmp = new Vector3(x, 0, z);
+        ghostMain.Direction= tmpDirection.normalized;
 
-//        m_ghostMain.MoveDirection = tmp.normalized;
+        if (ghostMain.Direction.magnitude > 0.1f)
+        {
 
-//        if (m_ghostMain.MoveDirection.magnitude > 0.1f)
-//        {
-//            if (!CInputComponent.InputAction(CInputComponent.KEY_ACTION.PRESS, KeyCode.Joystick1Button0, Dash))
-//            {
-//                m_ghostMain.m_pStateMachine.ChangeState(CGhostState_Move.Instance(), m_ghostMain.m_pStateMachine.CurrentState().IsEnd);
-//            }
-//            return;
-//        }
-       
-//        m_ghostMain.m_pStateMachine.ChangeState(CGhostState_Main.Instance(), m_ghostMain.m_pStateMachine.CurrentState().IsEnd);
+            if (Input.GetKey(KeyCode.LeftShift))
+            {
+                ghostMain.GhostStatusMessage = GhostInfo.GhostFiniteStatus.DASH;
+                return;
+            }
 
-//    }
+            ghostMain.GhostStatusMessage = GhostInfo.GhostFiniteStatus.WALK;
+            return;
+        }
 
-//    void OnAttackFlg()
-//    {
-
-//        m_ghostMain.m_pStateMachine.ChangeState(CGhostState_Atk.Instance(), m_ghostMain.m_pStateMachine.CurrentState().IsEnd);
-//    }
-
-//    void PutDummy()
-//    {
-//        //追加
-//        //Dummyを置く
-//        m_ghostMain.m_pStateMachine.ChangeState(CGhostState_Avatar.Instance(), m_ghostMain.m_pStateMachine.CurrentState().IsEnd);
-
-//    }
-
-//    void Dash()
-//    {
-//        m_ghostMain.m_pStateMachine.ChangeState(CGhostState_Dash.Instance(), m_ghostMain.m_pStateMachine.CurrentState().IsEnd);
-//    }
-//}
+        ghostMain.GhostStatusMessage = GhostInfo.GhostFiniteStatus.WAITING;
+    }
+}

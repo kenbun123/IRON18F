@@ -56,7 +56,7 @@ public class HumanControl : MonoBehaviour {
 
         if (humanMain.MoveDirection.magnitude > 0.1f) { 
 
-            if (Input.GetKey(KeyCode.LeftShift) && humanMain.Stamina >0)
+            if (Input.GetKey(KeyCode.LeftShift))
             {
                 humanMain.HumanStatusMessage = HumanInfo.HumanFiniteStatus.DASH;
                 return;

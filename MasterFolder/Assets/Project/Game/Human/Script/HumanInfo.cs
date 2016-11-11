@@ -35,6 +35,8 @@ public class HumanInfo : MonoBehaviour {
     [SerializeField][Header("最大スタミナ(秒)")]
     protected float maxStamina;
 
+    [SerializeField][Header("蘇生時間(秒)")]
+    protected float raiseTime;
 
 
 }

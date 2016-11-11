@@ -13,7 +13,9 @@ public class HumanMain : HumanInfo
     public HumanFiniteStatus HumanStatusMessage;
     public bool CanChangeStatus;
     public Vector3 MoveDirection;
-    public GameObject CarryHuman;
+    public ParticleSystem impatienceParticle;
+    public bool isFear;
+    //public GameObject CarryHuman;
 
     #region get,set
     public float NormalSpeed
@@ -30,6 +32,9 @@ public class HumanMain : HumanInfo
     }
     public float MaxStamina {
         get { return maxStamina; }
+    }
+    public float RaiseTime {
+        get { return raiseTime; }
     }
     public int Hp
     {
@@ -57,23 +62,33 @@ public class HumanMain : HumanInfo
     public FiniteStateMachine<HumanMain, HumanMain.HumanFiniteStatus> HumanStateMachine {
         get { return humanStateMachine; }
     }
+
     #endregion
 
-
+    #region Method
     void Awake()
     {
         CanChangeStatus = true;
         stamina = maxStamina;
         HumanStatusMessage = HumanFiniteStatus.WAITING;
+        isFear = false;
     }
 
     // Use this for initialization
     void Start()
     {
         //コンポーネントの取得
-        humanAnimation = CheckComponentNull<Animator>.CheckConmponentNull(this, "Class HumanMain : Don't Get Animator Component");
+        humanAnimation = CheckComponentNull<Animator>.CheckConmponentNull(gameObject, "Class HumanMain : Don't Get Animator Component");
         InitState();
 
+        //汗パーティクル
+        var tmpPrefab = (GameObject)Resources.Load("Prefab/ImpatienceParticle");
+        var tmpGameobj = Instantiate(tmpPrefab);
+        tmpGameobj.transform.parent = transform;
+        tmpGameobj.transform.position = transform.position;
+        tmpGameobj.transform.SetY(1.0f);
+        tmpGameobj.transform.localScale = new Vector3(1, 1, 1);
+        impatienceParticle = CheckComponentNull<ParticleSystem>.CheckConmponentNull(tmpGameobj, "Class HumanMain : Don't Get ParticleSystem Component");
 
     }
 
@@ -85,21 +100,19 @@ public class HumanMain : HumanInfo
             HumanStatusMessage = HumanFiniteStatus.DEATH;
         }
 
-
-
-
         humanStateMachine.Update();
 
         if (stamina <= 0)
         {
-            
+            if (!impatienceParticle.isPlaying)
+            {
+                impatienceParticle.Play();
+            }
+        }
+        else {
+            impatienceParticle.Stop();
         }
     }
-    void FixedUpdate()
-    {
-        
-    }
-
     public void Damage(int atk)
     {
         hp -= atk;
@@ -122,5 +135,5 @@ public class HumanMain : HumanInfo
         humanStateMachine.RegisterState(new HumanState.HumanStatusAction());
 
     }
-
+    #endregion
 }

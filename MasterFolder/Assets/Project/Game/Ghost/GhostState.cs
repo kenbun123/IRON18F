@@ -1,374 +1,410 @@
-﻿//using UnityEngine;
-//using System.Collections;
-//using System.Collections.Generic;
+﻿using UnityEngine;
+using System.Collections;
+using System.Collections.Generic;
 
-//public enum GhostStateID {
-//    MAIN,
-//    WAIT,
-//    MOVE,
-//    DASH,
-//    SLOW,
-//    STAN,
-//    ATK,
-//    AVATAR,
+public class GhostState  {
 
-//}
+    /// <summary>
+    /// 待機
+    /// </summary>
+    public class GhostStatusWait : FSMState<GhostMain, GhostMain.GhostFiniteStatus>
+    {
+        public override GhostMain.GhostFiniteStatus StateID
+        {
+            get
+            {
+                return GhostMain.GhostFiniteStatus.WAITING;
+            }
+        }
 
-//public class CGhostState_Main : CState<GhostMain>
-//{
-   
-//    public static CGhostState_Main instance;
-//    public static CGhostState_Main Instance()
-//    {
-//        if (instance == null)
-//            instance = new CGhostState_Main();
+        public override List<GhostMain.GhostFiniteStatus> NextStateIDs
+        {
+            get
+            {
+                return new List<GhostMain.GhostFiniteStatus> {
+                   GhostMain.GhostFiniteStatus.WALK,
+                   GhostMain.GhostFiniteStatus.DASH,
+                   GhostInfo.GhostFiniteStatus.SLOW,
+                   GhostInfo.GhostFiniteStatus.ATTACK,
+                   GhostInfo.GhostFiniteStatus.STAN,
+                   GhostInfo.GhostFiniteStatus.DUMMY
 
-//        return instance;
-//    }
+                };
+            }
+        }
 
-//    public override void Enter(GhostMain ghost)
-//    {
-//        this.IsEnd = true;
-//        ID = (int)GhostStateID.MAIN;
-//        ghost.m_animator.SetInteger("State", 0);
-//        ghost.m_animator.SetInteger("Act", 0);
-//    }
+        public override bool CanEnter(FSMState<GhostMain, GhostMain.GhostFiniteStatus> currentState)
+        {
+            if (entity.GhostStatusMessage != StateID) return false;
 
-//    public override void Execute(GhostMain ghost)
-//    {
+            if (entity.CanChangeStatus != true) return false;
 
-//    }
+            return true;
 
-//    public override void Exit(GhostMain ghost)
-//    {
+        }
+
+
+        public override void Enter()
+        {
+            entity.GhostAnimation.SetInteger("State", 0);
+            entity.GhostAnimation.SetInteger("Act", 0);
+        }
+        public override void Execute()
+        {
+
+
+        }
+        public override void Exit()
+        {
+
+        }
+    }
+
+    public class GhostStatusWalk : FSMState<GhostMain, GhostMain.GhostFiniteStatus>
+    {
+        public override GhostMain.GhostFiniteStatus StateID
+        {
+            get
+            {
+                return GhostMain.GhostFiniteStatus.WALK;
+            }
+        }
+
+        public override List<GhostMain.GhostFiniteStatus> NextStateIDs
+        {
+            get
+            {
+                return new List<GhostMain.GhostFiniteStatus> {
+                   GhostMain.GhostFiniteStatus.DASH,
+                   GhostInfo.GhostFiniteStatus.SLOW,
+                   GhostInfo.GhostFiniteStatus.WAITING,
+                   GhostInfo.GhostFiniteStatus.ATTACK,
+                   GhostInfo.GhostFiniteStatus.DUMMY,
+                   GhostInfo.GhostFiniteStatus.STAN
+
+                };
+            }
+        }
+
+        public override bool CanEnter(FSMState<GhostMain, GhostMain.GhostFiniteStatus> currentState)
+        {
+            if (entity.GhostStatusMessage != StateID) return false;
+
+            if (entity.CanChangeStatus != true) return false;
+
+            return true;
+
+        }
+
+
+        // public override List<HumanMain.HumanFiniteStatus> NextStateIDs { get { return new List<HumanMain.HumanFiniteStatus> { HumanMain.HumanFiniteStatus.DASH }; } }
+
+        public override void Enter()
+        {
+            entity.CanView = false;
+        }
+        public override void Execute()
+        {
+            entity.transform.position += new Vector3(entity.Direction.x * entity.NormalSpeed, 0, entity.Direction.z * entity.NormalSpeed);
+
+            if (entity.Direction.magnitude > 0.1f)
+            {
+                Quaternion tmpRotation = Quaternion.LookRotation(entity.Direction);
+                entity.transform.rotation = Quaternion.Lerp(entity.transform.rotation, tmpRotation, Time.deltaTime * 10.0f);
+            }
+
+            entity.GhostAnimation.SetInteger("State", 1);
+
+        }
+        public override void Exit()
+        {
+
+        }
+    }
+
+    public class GhostStatusDash : FSMState<GhostMain, GhostMain.GhostFiniteStatus>
+    {
+        public override GhostMain.GhostFiniteStatus StateID
+        {
+            get
+            {
+                return GhostMain.GhostFiniteStatus.DASH;
+            }
+        }
+
+        public override List<GhostMain.GhostFiniteStatus> NextStateIDs
+        {
+            get
+            {
+                return new List<GhostMain.GhostFiniteStatus> {
+                   GhostInfo.GhostFiniteStatus.SLOW,
+                   GhostInfo.GhostFiniteStatus.WALK,
+                   GhostInfo.GhostFiniteStatus.WAITING,
+                   GhostInfo.GhostFiniteStatus.ATTACK
+
+
+                };
+            }
+        }
+
+        public override bool CanEnter(FSMState<GhostMain, GhostMain.GhostFiniteStatus> currentState)
+        {
+            if (entity.GhostStatusMessage != StateID) return false;
+
+            if (entity.CanChangeStatus != true) return false;
+
+            return true;
+
+        }
+
+        public override void Enter()
+        {
+            entity.CanView = true;
+        }
+        public override void Execute()
+        {
+            entity.transform.position += new Vector3(entity.Direction.x * entity.DashSpeed, 0, entity.Direction.z * entity.DashSpeed);
+
+            if (entity.Direction.magnitude > 0.1f)
+            {
+                Quaternion tmpRotation = Quaternion.LookRotation(entity.Direction);
+                entity.transform.rotation = Quaternion.Lerp(entity.transform.rotation, tmpRotation, Time.deltaTime * 10.0f);
+            }
+
+            entity.GhostAnimation.SetInteger("State", 2);
+
+        }
+        public override void Exit()
+        {
+
+        }
+    }
+
+    public class GhostStatusSlow : FSMState<GhostMain, GhostMain.GhostFiniteStatus>
+    {
+        public override GhostMain.GhostFiniteStatus StateID
+        {
+            get
+            {
+                return GhostMain.GhostFiniteStatus.SLOW;
+            }
+        }
+
+        public override List<GhostMain.GhostFiniteStatus> NextStateIDs
+        {
+            get
+            {
+                return new List<GhostMain.GhostFiniteStatus> {
+                    GhostInfo.GhostFiniteStatus.DASH,
+                   GhostInfo.GhostFiniteStatus.WALK,
+                   GhostInfo.GhostFiniteStatus.WAITING,
+                   GhostInfo.GhostFiniteStatus.ATTACK,
+                   GhostInfo.GhostFiniteStatus.STAN,
+                   GhostInfo.GhostFiniteStatus.DUMMY
+
+
+                };
+            }
+        }
+
+        public override bool CanEnter(FSMState<GhostMain, GhostMain.GhostFiniteStatus> currentState)
+        {
+            if (entity.GhostStatusMessage != StateID) return false;
+
+            if (entity.CanChangeStatus != true) return false;
+
+            return true;
+
+        }
+
+        public override void Enter()
+        {
+
+        }
+        public override void Execute()
+        {
+
+
+        }
+        public override void Exit()
+        {
+
+        }
+    }
+
+    public class GhostStatusAttack : FSMState<GhostMain, GhostMain.GhostFiniteStatus>
+    {
+
+        GameObject atkParticlePrefab;
+        private float count;
+        GameObject atkParticle;
         
-//    }
-//}
+        public override GhostMain.GhostFiniteStatus StateID
+        {
+            get
+            {
+                return GhostMain.GhostFiniteStatus.ATTACK;
+            }
+        }
 
-//public class CGhostState_Wait : CState<GhostMain>
-//{
+        public override List<GhostMain.GhostFiniteStatus> NextStateIDs
+        {
+            get
+            {
+                return new List<GhostMain.GhostFiniteStatus> {
+                   GhostInfo.GhostFiniteStatus.WAITING,
+                   GhostInfo.GhostFiniteStatus.STAN
+                };
+            }
+        }
 
-//    public static CGhostState_Wait instance;
-//    public static CGhostState_Wait Instance()
-//    {
-//        if (instance == null)
-//            instance = new CGhostState_Wait();
+        public override bool CanEnter(FSMState<GhostMain, GhostMain.GhostFiniteStatus> currentState)
+        {
+            if (entity.GhostStatusMessage != StateID) return false;
 
-//        return instance;
-//    }
+            if (entity.CanChangeStatus != true) return false;
 
-//    public override void Enter(GhostMain ghost)
-//    {
-//        this.IsEnd = true;
-//        ID = (int)GhostStateID.WAIT;
-//    }
+            return true;
 
-//    public override void Execute(GhostMain ghost)
-//    {
+        }
+
+        public override void Enter()
+        {
+            entity.CanChangeStatus = false;
+            if (atkParticlePrefab == null)
+            {
+                atkParticlePrefab = (GameObject)Resources.Load("Prefab/HandAttckParticle");
+            }
+            count = 0f;
+            entity.GhostAnimation.SetInteger("Act", 1);
+            entity.CanView = true;
+            entity.AttackCollider.enabled = true;
+        }
+        public override void Execute()
+        {
+            count += Time.deltaTime;
+            if (count > 0.15f)
+            {
+                if (atkParticle == null)
+                {
+                    atkParticle = (GameObject)MonoBehaviour.Instantiate(atkParticlePrefab, entity.transform.position, entity.transform.rotation);
+                    atkParticle.transform.parent = entity.transform;
+                    //CSoundManager.Instance.PlaySE(EAudioList.SE_HumanScream);
+
+                }
+
+                entity.transform.Translate(entity.transform.forward * entity.NormalSpeed * Time.deltaTime * 10, Space.World);
+            }
+
+            if (CAnimetionController.IsMotionEnd(entity.GhostAnimation,"Atk"))
+            {
+                entity.GhostStatusMessage = GhostInfo.GhostFiniteStatus.WAITING;
+                entity.CanChangeStatus = true;
+                entity.GhostStateMachine.ChangeState(entity.GhostStateMachine.GetRegisterState(GhostInfo.GhostFiniteStatus.WAITING));
 
 
-//    }
+            }
+        }
+        public override void Exit()
+        {
+            entity.GhostAnimation.SetInteger("Act", 0);
+            Object.Destroy(atkParticle);
+            atkParticle = null;
+            entity.CanView = false;
+            entity.AttackCollider.enabled = false;
+        }
+    }
 
-//    public override void Exit(GhostMain ghost)
-//    {
+    public class GhostStatusDummy : FSMState<GhostMain, GhostMain.GhostFiniteStatus>
+    {
+        public override GhostMain.GhostFiniteStatus StateID
+        {
+            get
+            {
+                return GhostMain.GhostFiniteStatus.DUMMY;
+            }
+        }
 
-//    }
-//}
+        public override List<GhostMain.GhostFiniteStatus> NextStateIDs
+        {
+            get
+            {
+                return new List<GhostMain.GhostFiniteStatus> {
+                   GhostInfo.GhostFiniteStatus.WAITING,
+                   GhostInfo.GhostFiniteStatus.STAN
+                };
+            }
+        }
 
-//public class CGhostState_Move : CState<GhostMain>
-//{
+        public override bool CanEnter(FSMState<GhostMain, GhostMain.GhostFiniteStatus> currentState)
+        {
+            if (entity.GhostStatusMessage != StateID) return false;
 
-//    public static CGhostState_Move instance;
-//    public static CGhostState_Move Instance()
-//    {
-//        if (instance == null)
-//            instance = new CGhostState_Move();
+            if (entity.CanChangeStatus != true) return false;
 
-//        return instance;
-//    }
+            return true;
 
-//    public override void Enter(GhostMain ghost)
-//    {
-//        ID = (int)GhostStateID.MOVE;
-//        this.IsEnd = true;
+        }
 
-//        ghost.m_viewStatus = GhostMain.GHOTS_VIEW_STATUS.INVISIBLE;
+        public override void Enter()
+        {
+            entity.CanChangeStatus = false;
+        }
+        public override void Execute()
+        {
 
-//    }
 
-//    public override void Execute(GhostMain ghost)
-//    {
-//        // 移動する向きとスピードを代入する
-//        ghost.transform.position += new Vector3(ghost.MoveDirection.x * (ghost.NomalSpeed * ghost.ShowBuff) / 10, 0, ghost.MoveDirection.z * ghost.NomalSpeed / 10);
+        }
+        public override void Exit()
+        {
 
-//        if (ghost.MoveDirection.magnitude > 0.1f)
-//        {
-//            ghost.transform.rotation = Quaternion.LookRotation(ghost.MoveDirection);
-//        }
+        }
+    }
 
-//        ghost.m_animator.SetInteger("State", 1);
-//    }
+    public class GhostStatusStan : FSMState<GhostMain, GhostMain.GhostFiniteStatus>
+    {
+        public override GhostMain.GhostFiniteStatus StateID
+        {
+            get
+            {
+                return GhostMain.GhostFiniteStatus.STAN;
+            }
+        }
 
-//    public override void Exit(GhostMain ghost)
-//    {
-//        ghost.m_viewStatus = GhostMain.GHOTS_VIEW_STATUS.INVISIBLE;
-//    }
-//}
+        public override List<GhostMain.GhostFiniteStatus> NextStateIDs
+        {
+            get
+            {
+                return new List<GhostMain.GhostFiniteStatus> {
+                   GhostInfo.GhostFiniteStatus.WAITING
+                };
+            }
+        }
 
-//public class CGhostState_Dash : CState<GhostMain>
-//{
+        public override bool CanEnter(FSMState<GhostMain, GhostMain.GhostFiniteStatus> currentState)
+        {
+            if (entity.GhostStatusMessage != StateID) return false;
 
-//    public static CGhostState_Dash instance;
-//    public static CGhostState_Dash Instance()
-//    {
-//        if (instance == null)
-//            instance = new CGhostState_Dash();
+            if (entity.CanChangeStatus != true) return false;
 
-//        return instance;
-//    }
+            return true;
 
-//    public override void Enter(GhostMain ghost)
-//    {
-//        ID = (int)GhostStateID.DASH;
-//        this.IsEnd = true;
-//        ghost.m_viewStatus = GhostMain.GHOTS_VIEW_STATUS.VISIBLE;
-//    }
+        }
 
-//    public override void Execute(GhostMain ghost)
-//    {
-//        // 移動する向きとスピードを代入する
-//        ghost.transform.position += new Vector3(ghost.MoveDirection.x * (ghost.DashSpeed * ghost.ShowBuff) / 10, 0, ghost.MoveDirection.z * ghost.DashSpeed / 10);
+        public override void Enter()
+        {
+            entity.CanChangeStatus = false;
+        }
+        public override void Execute()
+        {
 
-//        if (ghost.MoveDirection.magnitude > 0.1f)
-//        {
-//            ghost.transform.rotation = Quaternion.LookRotation(ghost.MoveDirection);
-//        }
-//        ghost.m_animator.SetInteger("State", 2);
 
-//    }
+        }
+        public override void Exit()
+        {
 
-//    public override void Exit(GhostMain ghost)
-//    {
- 
-//        ghost.m_viewStatus = GhostMain.GHOTS_VIEW_STATUS.INVISIBLE;
-//    }
-//}
+        }
+    }
 
-//public class CGhostState_Slow : CState<GhostMain>
-//{
 
-//    public static CGhostState_Slow instance;
-//    public static CGhostState_Slow Instance()
-//    {
-//        if (instance == null)
-//            instance = new CGhostState_Slow();
-
-//        return instance;
-//    }
-
-//    public override void Enter(GhostMain ghost)
-//    {
-//        ID = (int)GhostStateID.SLOW;
-//        this.IsEnd = true;
-//        ghost.m_viewStatus = GhostMain.GHOTS_VIEW_STATUS.VISIBLE;
-//    }
-
-//    public override void Execute(GhostMain ghost)
-//    {
-//        ghost.m_viewStatus = GhostMain.GHOTS_VIEW_STATUS.VISIBLE;
-//        // 移動する向きとスピードを代入する
-//        if(ghost.m_pStateMachine.CurrentState().ID==(int)GhostStateID.MOVE)
-//        {
-//            ghost.ShowBuff = ghost.SlowSpeed / ghost.NomalSpeed;
-//        }
-
-//        if(ghost.m_pStateMachine.CurrentState().ID==(int)GhostStateID.DASH)
-//        {
-//            ghost.ShowBuff = ghost.SlowSpeed / ghost.DashSpeed;
-//        }
-        
-
-//    }
-
-//    public override void Exit(GhostMain ghost)
-//    {
-
-//        ghost.m_viewStatus = GhostMain.GHOTS_VIEW_STATUS.INVISIBLE;
-//        ghost.ShowBuff = 1;
-//    }
-//}
-
-//public class CGhostState_Stan : CState<GhostMain>
-//{
-//    float m_nowTime;
-//    public static CGhostState_Stan instance;
-//    public static CGhostState_Stan Instance()
-//    {
-//        if (instance == null)
-//            instance = new CGhostState_Stan();
-
-//        return instance;
-//    }
-
-//    public override void Enter(GhostMain ghost)
-//    {
-//        m_nowTime = 0;
-//        ID = (int)GhostStateID.STAN;
-//        ghost.m_animator.SetInteger("State", 3);
-//        this.IsEnd = true;
-//        ghost.GhostScore.hitCandy++;
-//        ghost.Eatpatincle.SetActive(true);
-//    }
-
-//    public override void Execute(GhostMain ghost)
-//    {
-
-//        //スタンされているなら　スタン時間を計算する
-
-//        ghost.m_viewStatus = GhostMain.GHOTS_VIEW_STATUS.VISIBLE;
-//        m_nowTime += Time.deltaTime;
-//        if (m_nowTime >= ghost.m_stanInterval)
-//        {
-
-//            ghost.m_pStateMachine.ChangeState(CGhostState_Main.Instance());
-
-//            m_nowTime = 0;
-//        }
-        
-        
-//    }
-
-//    public override void Exit(GhostMain ghost)
-//    {
-//        ghost.Eatpatincle.SetActive(false);
-//        ghost.m_viewStatus = GhostMain.GHOTS_VIEW_STATUS.INVISIBLE;
-//    }
-//}
-
-//public class CGhostState_Atk : CState<GhostMain>
-//{
-//    private float count;
-//    private bool IsAtkPatOn;
-//    public static CGhostState_Atk instance;
-//    public static CGhostState_Atk Instance()
-//    {
-//        if (instance == null)
-//            instance = new CGhostState_Atk();
-
-//        return instance;
-//    }
-
-//    public override void Enter(GhostMain ghost)
-//    {
-//        count = 0;
-//        Debug.Log(count);
-//        ghost.m_viewStatus = GhostMain.GHOTS_VIEW_STATUS.VISIBLE;
-//        this.IsEnd = false;
-//        ID = (int)GhostStateID.ATK;
-//        IsAtkPatOn = false;
-//        ghost.m_animator.SetInteger("Act", 1);
-//        ghost.IsAttack = true;
-
-//    }
-
-//    public override void Execute(GhostMain ghost)
-//    {
-//        count += Time.deltaTime;
-//        if (count > 0.15f)
-//        {
-//            if (IsAtkPatOn==false)
-//            {
-//                GameObject tmp_obj = (GameObject)MonoBehaviour.Instantiate(ghost.atkParticle, ghost.transform.position, ghost.transform.rotation);
-//                tmp_obj.transform.parent = ghost.transform;
-//                //CSoundManager.Instance.PlaySE(EAudioList.SE_HumanScream);
-//                IsAtkPatOn = true;
-//            }
-
-//            ghost.transform.Translate(ghost.transform.forward * ghost.AtkSpeed * Time.deltaTime * 10, Space.World);
-//        }
-//        if (ghost.IsMotionEnd("Atk"))
-//        {
-//            IsEnd = true;
-//        }
-//        if (ghost.m_nowAttackHuman != null)
-//        {
-//            ghost.m_nowAttackHuman.GetComponent<CHuman>().Damage();
-//            ghost.GhostScore.knockOut++;
-            
-
-//        }
-//    }
-
-//    public override void Exit(GhostMain ghost)
-//    {
-//        ghost.m_nowAttackHuman = null;
-//        ghost.IsAttack = false;
-//        IsAtkPatOn = false;
-//        ghost.m_viewStatus = GhostMain.GHOTS_VIEW_STATUS.INVISIBLE;
-//        ghost.m_animator.SetInteger("Act", 0);
-//    }
-//}
-
-//public class CGhostState_Avatar : CState<GhostMain>
-//{
-
-//    public static CGhostState_Avatar instance;
-//    public static CGhostState_Avatar Instance()
-//    {
-//        if (instance == null)
-//            instance = new CGhostState_Avatar();
-
-//        return instance;
-//    }
-
-//    public override void Enter(GhostMain ghost)
-//    {
-
-//        ID = (int)GhostStateID.AVATAR;
-//        this.IsEnd = false;
-//        if (ghost.m_nowDunmmyNum != 0)
-//        {
-//            ghost.m_animator.SetInteger("Act", 2);
-//        }
-//    }
-
-//    public override void Execute(GhostMain ghost)
-//    {
-
-//        if (ghost.IsMotionEnd("Bunshin"))
-//        {
-//            IsEnd = true;
-//        }
-//    }
-
-//    public override void Exit(GhostMain ghost)
-//    {
-//        ghost.m_nowDunmmyNum = 0;
-//        for (int i = 0; i < 3; i++)
-//        {
-//            if (ghost.dGhost[i].GetComponent<DummyGhost>().IsAct == false)
-//            {
-//                ghost.m_nowDunmmyNum++;
-//            }
-//        }
-
-//        if (ghost.m_nowDunmmyNum != 0)
-//        {
-//            Debug.Log("Dummyを置いたよ");
-//           // CSoundManager.Instance.PlaySE(EAudioList.SE_DummyGhost);
-//            for (int i = 0; i < 3; i++)
-//            {
-//                if (ghost.dGhost[i].GetComponent<DummyGhost>().IsAct == false)
-//                {
-//                    ghost.dGhost[i].transform.parent = null;
-//                    ghost.dGhost[i].GetComponent<CapsuleCollider>().enabled = true;
-//                    ghost.dGhost[i].GetComponent<DummyGhost>().IsAct = true;
-//                    ghost.dGhost[i].transform.position = ghost.transform.position;
-//                    break;
-//                }
-
-//            }
-//        }
-//        ghost.m_animator.SetInteger("Act", 0);
-//    }
-//}
+}

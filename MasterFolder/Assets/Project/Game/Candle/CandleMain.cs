@@ -23,7 +23,7 @@ public class CandleMain : MonoBehaviour {
     void Start()
     {
         CapsuleCollider tmp = new CapsuleCollider() ;
-        mesh = CheckComponentNull<MeshRenderer>.CheckConmponentNull(this, "Class CandleMain : Don't　Get MeshRenderer");
+        mesh = CheckComponentNull<MeshRenderer>.CheckConmponentNull(gameObject, "Class CandleMain : Don't　Get MeshRenderer");
         switch (nowStatus)
         {
             case CandleStatus.FIRE:
@@ -32,7 +32,7 @@ public class CandleMain : MonoBehaviour {
                 fireObject.transform.position = transform.position;
                 fireObject.transform.parent = transform;
 
-                tmp = CheckComponentNull<CapsuleCollider>.CheckConmponentNull(this, "Class CandleMain : Don't　Get CapsuleCollider");
+                tmp = CheckComponentNull<CapsuleCollider>.CheckConmponentNull(gameObject, "Class CandleMain : Don't　Get CapsuleCollider");
 
                 if (tmp != null)
                 {
@@ -46,7 +46,7 @@ public class CandleMain : MonoBehaviour {
                 break;
             case CandleStatus.ALTUR:
 
-                tmp = CheckComponentNull<CapsuleCollider>.CheckConmponentNull(this, "Class CandleMain : Don't　Get CapsuleCollider");
+                tmp = CheckComponentNull<CapsuleCollider>.CheckConmponentNull(gameObject, "Class CandleMain : Don't　Get CapsuleCollider");
                 if (tmp != null)
                 {
                     tmp.enabled = false;
